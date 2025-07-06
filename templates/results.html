@@ -275,6 +275,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Safe JSON parsing with fallbacks
+        function safeParseJSON(data, fallback = {}) {
+            try {
+                return typeof data === 'string' ? JSON.parse(data) : data;
+            } catch (e) {
+                console.error('JSON parsing error:', e);
+                return fallback;
+            }
+        }
+
+        // Get data with fallbacks
+        const airlineData = safeParseJSON('{{ analysis.airline_distribution | tojson | safe }}', {});
+        const hourlyData = safeParseJSON('{{ analysis.hourly_distribution | tojson | safe }}', {});
+        const originData = safeParseJSON('{{ analysis.origin_distribution | tojson | safe }}', {});
+        const statusData = safeParseJSON('{{ analysis.status_distribution | tojson | safe }}', {});
+
         // Chart.js configurations
         const chartOptions = {
             responsive: true,
@@ -287,114 +303,122 @@
         };
 
         // Airline Distribution Chart
-        const airlineCtx = document.getElementById('airlineChart').getContext('2d');
-        new Chart(airlineCtx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys({{ analysis.airline_distribution | tojson }}),
-                datasets: [{
-                    data: Object.values({{ analysis.airline_distribution | tojson }}),
-                    backgroundColor: [
-                        '#667eea', '#764ba2', '#f093fb', '#f5576c', 
-                        '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                ...chartOptions,
-                plugins: {
-                    ...chartOptions.plugins,
-                    title: {
-                        display: true,
-                        text: 'Market Share by Airline'
+        if (Object.keys(airlineData).length > 0) {
+            const airlineCtx = document.getElementById('airlineChart').getContext('2d');
+            new Chart(airlineCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(airlineData),
+                    datasets: [{
+                        data: Object.values(airlineData),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#f5576c', 
+                            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        title: {
+                            display: true,
+                            text: 'Market Share by Airline'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Hourly Distribution Chart
-        const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
-        new Chart(hourlyCtx, {
-            type: 'line',
-            data: {
-                labels: Object.keys({{ analysis.hourly_distribution | tojson }}).map(h => h + ':00'),
-                datasets: [{
-                    label: 'Flights per Hour',
-                    data: Object.values({{ analysis.hourly_distribution | tojson }}),
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Flights'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Hour of Day'
+        if (Object.keys(hourlyData).length > 0) {
+            const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+            new Chart(hourlyCtx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(hourlyData).map(h => h + ':00'),
+                    datasets: [{
+                        label: 'Flights per Hour',
+                        data: Object.values(hourlyData),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Flights'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour of Day'
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Route Distribution Chart
-        const routeCtx = document.getElementById('routeChart').getContext('2d');
-        new Chart(routeCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys({{ analysis.origin_distribution | tojson }}),
-                datasets: [{
-                    label: 'Flights from Origin',
-                    data: Object.values({{ analysis.origin_distribution | tojson }}),
-                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
-                    borderColor: '#764ba2',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Flights'
+        if (Object.keys(originData).length > 0) {
+            const routeCtx = document.getElementById('routeChart').getContext('2d');
+            new Chart(routeCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(originData),
+                    datasets: [{
+                        label: 'Flights from Origin',
+                        data: Object.values(originData),
+                        backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                        borderColor: '#764ba2',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Flights'
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Status Distribution Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        new Chart(statusCtx, {
-            type: 'pie',
-            data: {
-                labels: Object.keys({{ analysis.status_distribution | tojson }}),
-                datasets: [{
-                    data: Object.values({{ analysis.status_distribution | tojson }}),
-                    backgroundColor: [
-                        '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: chartOptions
-        });
+        if (Object.keys(statusData).length > 0) {
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(statusData),
+                    datasets: [{
+                        data: Object.values(statusData),
+                        backgroundColor: [
+                            '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: chartOptions
+            });
+        }
 
         // Auto-refresh every 5 minutes
         setTimeout(function() {
