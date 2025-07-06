@@ -1,46 +1,81 @@
-# Airline Market Demand Analyzer 🛩️
+# Australian Flight Demand Analyzer
 
-A comprehensive Python web application for analyzing airline booking trends and market demand patterns, specifically designed for hostel groups in Australia.
+A Python web application that scrapes real-time flight data from multiple sources and provides AI-powered market demand insights specifically tailored for hostel businesses across Australia.
 
-## 🚀 Features
+## 🚀 Live Demo
 
-- **Real-time Data Collection**: Integrates with AviationStack API for live flight data
-- **Market Trend Analysis**: Identifies popular routes, pricing patterns, and demand fluctuations
-- **AI-Powered Insights**: Uses OpenAI API to generate market intelligence summaries
-- **Interactive Dashboard**: Modern web interface with real-time charts and visualizations
-- **Australian Focus**: Specifically analyzes major Australian airports and routes
-- **Hostel Business Intelligence**: Tailored insights for accommodation providers
+Access the application at: `http://localhost:5000` (after setup)
 
-## 📋 Requirements
+## 📋 Overview
 
-```txt
-Flask==2.3.3
-requests==2.31.0
-pandas==2.1.4
-plotly==5.17.0
-numpy==1.24.3
-python-dotenv==1.0.0
-sqlite3
-```
+This web application helps hostel owners understand airline booking market demand by:
+- Scraping real-time flight data from FlightAware and FlightRadar24
+- Analyzing flight patterns, airline market share, and demand trends
+- Providing AI-generated insights for business planning
+- Visualizing data through interactive charts and tables
 
-## 🔧 Installation & Setup
+## 🛠️ Technical Approach
 
-### 1. Clone or Download the Project
+### Data Collection Strategy
+1. **Primary Source**: FlightAware flight arrival data
+2. **Secondary Source**: FlightRadar24 API for additional coverage
+3. **Fallback**: Realistic synthetic data when scraping fails
+4. **Compliance**: Respects rate limits and terms of service
 
+### Data Processing Pipeline
+1. **Scraping**: BeautifulSoup + requests for web scraping
+2. **Cleaning**: pandas for data normalization and processing
+3. **Analysis**: Statistical analysis of flight patterns
+4. **Insights**: OpenAI GPT-3.5 for intelligent market insights
+5. **Visualization**: Chart.js for interactive data visualization
+
+### Architecture
+- **Backend**: Flask web framework
+- **Frontend**: Bootstrap 5 + Chart.js for responsive UI
+- **Data Processing**: pandas for efficient data manipulation
+- **AI Integration**: OpenAI API for market insights
+- **Scraping**: requests + BeautifulSoup for data extraction
+
+## 🔧 Setup Instructions
+
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
+- Internet connection for data scraping
+
+### Quick Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Airline-Market-Demand-Analy
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure API keys (Optional)**
+   - Edit `config.py`
+   - Replace `'your-api-key-here'` with your OpenAI API key for AI insights
+   - If no API key provided, the app will use rule-based insights
+
+4. **Run the application**
+   ```bash
+   python app.py
+   ```
+
+5. **Access the application**
+   - Open your browser to `http://localhost:5000`
+   - Select an Australian airport (SYD, MEL, BNE, PER, ADL, DRW)
+   - Click "Analyze Market Demand"
+
+### Detailed Setup
+
+#### Step 1: Environment Setup
 ```bash
-# Create project directory
-mkdir airline-demand-analyzer
-cd airline-demand-analyzer
-
-# Copy the main application file (save as app.py)
-# Copy requirements.txt
-# Copy .env.example
-```
-
-### 2. Install Dependencies
-
-```bash
-# Create virtual environment
+# Create virtual environment (recommended)
 python -m venv venv
 
 # Activate virtual environment
@@ -49,163 +84,68 @@ venv\Scripts\activate
 # On macOS/Linux:
 source venv/bin/activate
 
-# Install requirements
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Environment Setup (Optional)
+#### Step 2: Configuration
+Edit `config.py` to customize:
+- Request delays between scraping attempts
+- API keys for enhanced insights
+- User agent strings for scraping
 
-Create a `.env` file in the project root:
+#### Step 3: Optional OpenAI Integration
+For AI-powered insights:
+1. Get an OpenAI API key from https://platform.openai.com/
+2. Replace `'your-api-key-here'` in `config.py`
+3. The app works without this key using rule-based insights
 
-```env
-# Optional: For real flight data (free tier available)
-AVIATIONSTACK_API_KEY=your_aviationstack_api_key_here
-
-# Optional: For AI insights (requires OpenAI account)
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Flask configuration
-SECRET_KEY=your-secret-key-here
-FLASK_ENV=development
-```
-
-### 4. Run the Application
-
+#### Step 4: Running the Application
 ```bash
 python app.py
 ```
 
-The application will be available at `http://localhost:5000`
+The application will start on `http://localhost:5000`
 
-## 🔑 API Keys (Optional)
+## 🖥️ Usage Guide
 
-### AviationStack API (Free Tier)
-- Sign up at [aviationstack.com](https://aviationstack.com)
-- Free tier: 1,000 requests/month
-- Provides real-time flight data
+### Basic Usage
+1. **Select Airport**: Choose from 6 major Australian airports
+2. **Analyze**: Click the analyze button to scrape real-time data
+3. **View Results**: Get comprehensive insights including:
+   - Flight volume and airline market share
+   - Peak demand hours and popular routes
+   - On-time performance metrics
+   - AI-generated business insights
 
-### OpenAI API (Paid)
-- Sign up at [platform.openai.com](https://platform.openai.com)
-- Used for AI-generated market insights
-- Minimal usage cost (~$0.01 per analysis)
+### Features
+- **Real-time Data**: Live flight information from multiple sources
+- **Smart Analytics**: AI-powered market demand insights
+- **Interactive Charts**: Visual representation of flight patterns
+- **Responsive Design**: Works on desktop and mobile devices
+- **Business Focus**: Insights tailored for hostel operations
 
-**Note**: Without API keys, the application will use synthetic data for demonstration purposes.
+## 📊 Data Sources
 
-## 📊 How to Use
+1. **FlightAware**: Primary source for arrival data
+2. **FlightRadar24**: Secondary API for additional coverage
+3. **OpenSky Network**: Aviation statistics
+4. **Synthetic Data**: Realistic fallback when scraping fails
 
-1. **Start the Application**
-   ```bash
-   python app.py
-   ```
+## 🔍 Key Insights Provided
 
-2. **Collect Flight Data**
-   - Click "Collect Data" button
-   - App fetches ~200 flight records
-   - Data is stored in local SQLite database
+### Market Demand Analysis
+- Peak travel hours for optimal hostel check-in timing
+- Popular routes indicating high-demand corridors
+- Airline market share for partnership opportunities
+- Seasonal patterns for capacity planning
 
-3. **Analyze Market Trends**
-   - Click "Analyze Trends" button
-   - Generates insights about popular routes
-   - Creates price trend analysis
-   - Displays demand patterns
+### Performance Metrics
+- On-time performance affecting guest arrival predictability
+- Flight volume trends for demand forecasting
+- Origin distribution for targeted marketing
 
-4. **View Results**
-   - Interactive charts and visualizations
-   - Detailed route analysis table
-   - AI-generated market insights
-   - Export-ready data views
-
-## 🏗️ Project Structure
-
-```
-airline-demand-analyzer/
-├── app.py                 # Main Flask application
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-├── .env                  # Your environment variables (create this)
-├── airline_data.db       # SQLite database (auto-created)
-├── templates/
-│   └── index.html        # Main dashboard template (auto-created)
-├── static/               # Static files (if needed)
-└── README.md            # This file
-```
-
-## 🎯 Business Applications
-
-### For Hostel Operators:
-- **Location Intelligence**: Identify high-traffic airports and routes
-- **Pricing Strategy**: Understand demand patterns for dynamic pricing
-- **Marketing Timing**: Target campaigns during peak travel periods
-- **Capacity Planning**: Anticipate guest volume based on flight patterns
-
-### Key Metrics Tracked:
-- Most popular flight routes
-- Average airfare pricing trends
-- Seasonal demand variations
-- Airport traffic patterns
-- Travel destination preferences
-
-## 🔍 Technical Features
-
-### Data Collection:
-- **Primary**: AviationStack API integration
-- **Fallback**: Synthetic data generation for demo
-- **Storage**: SQLite database for persistence
-- **Processing**: Pandas for data manipulation
-
-### Analysis Engine:
-- Route popularity ranking
-- Price trend calculation
-- Demand score analysis
-- Temporal pattern recognition
-
-### Visualization:
-- Interactive Plotly charts
-- Real-time data updates
-- Responsive design
-- Mobile-friendly interface
-
-### AI Integration:
-- OpenAI GPT integration
-- Context-aware insights
-- Business-focused recommendations
-- Fallback synthetic insights
-
-## 🚨 Troubleshooting
-
-### Common Issues:
-
-1. **Module Not Found Errors**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **API Rate Limits**
-   - AviationStack: 1,000 requests/month on free tier
-   - OpenAI: Pay-per-use pricing
-   - App automatically falls back to synthetic data
-
-3. **Database Issues**
-   - Delete `airline_data.db` to reset
-   - App will recreate database on next run
-
-4. **Port Already in Use**
-   - Change port in `app.py`: `app.run(port=5001)`
-   - Or kill process using port 5000
-
-### Performance Tips:
-- Use real APIs for production deployment
-- Consider caching for frequently accessed data
-- Implement data retention policies for database growth
-- Use environment variables for configuration
-
-## 📈 Future Enhancements
-
-- [ ] Real-time data streaming
-- [ ] Advanced predictive analytics
-- [ ] Email report automation
-- [ ] Multi-region support
-- [ ] API rate limiting and caching
-- [ ] User authentication
-- [ ] Data export functionality
-- [ ] Mobile app companion
+### Business Intelligence
+- Optimal pricing strategies based on demand patterns
+- Staff scheduling recommendations
+- Marketing timing for maximum impact
