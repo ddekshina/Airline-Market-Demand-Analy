@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results - Flight Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis for {{ airport }}</h1>
+        
+        <div class="insights">
+            <h2>AI-Generated Insights</h2>
+            <div class="insights-box">{{ insights }}</div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="flightChart"></canvas>
+        </div>
+        
+        <script>
+            const ctx = document.getElementById('flightChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys({{ analysis.airline_distribution | tojson }}),
+                    datasets: [{
+                        label: 'Flights by Airline',
+                        data: Object.values({{ analysis.airline_distribution | tojson }}),
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    }]
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
