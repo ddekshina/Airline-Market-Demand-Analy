@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Market Demand Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Airline Market Demand Analyzer</h1>
+                        <p class="text-blue-100 mt-2">Market Intelligence for Australian Hostel Groups</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="collectDataBtn" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-download mr-2"></i>Collect Data
+                        </button>
+                        <button id="analyzeBtn" class="bg-green-500 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-chart-line mr-2"></i>Analyze Trends
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Status Bar -->
+            <div id="statusBar" class="mb-6 p-4 bg-white rounded-lg shadow-md hidden">
+                <div class="flex items-center">
+                    <div id="statusIcon" class="mr-3"></div>
+                    <div id="statusMessage" class="text-gray-700"></div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden mb-6">
+                <div class="flex justify-center items-center p-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <span class="ml-4 text-gray-600">Processing data...</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Stats</h3>
+                    <div id="quickStats" class="space-y-3">
+                        <div class="text-gray-600">Click "Collect Data" to start</div>
+                    </div>
+                </div>
+
+                <!-- Top Routes -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Top Routes</h3>
+                    <div id="topRoutes" class="space-y-2">
+                        <div class="text-gray-600">No data available</div>
+                    </div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-robot mr-2 text-blue-600"></i>AI Insights
+                    </h3>
+                    <div id="aiInsights" class="text-gray-600 text-sm">
+                        Run analysis to get AI-powered market insights
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualizations -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                <!-- Popular Routes Chart -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Popular Routes</h3>
+                    <div id="popularRoutesChart" class="h-96"></div>
+                </div>
+
+                <!-- Price Trends Chart -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Price Trends</h3>
+                    <div id="priceTrendsChart" class="h-96"></div>
+                </div>
+            </div>
+
+            <!-- Demand Distribution -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Demand Distribution</h3>
+                <div id="demandChart" class="h-96"></div>
+            </div>
+
+            <!-- Detailed Data Table -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Detailed Route Analysis</h3>
+                <div class="overflow-x-auto">
+                    <table id="routeTable" class="w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Route</th>
+                                <th class="px-4 py-2 text-left">Cities</th>
+                                <th class="px-4 py-2 text-left">Flights</th>
+                                <th class="px-4 py-2 text-left">Avg Price</th>
+                                <th class="px-4 py-2 text-left">Demand Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routeTableBody">
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                    No data available. Click "Analyze Trends" to populate the table.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+            <p>&copy; 2024 Airline Market Demand Analyzer. Built for Australian Hostel Groups.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Application state
+        let appState = {
+            dataCollected: false,
+            analysisComplete: false
+        };
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingIndicator').classList.add('hidden');
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusBar = document.getElementById('statusBar');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            statusBar.classList.remove('hidden');
+            statusMessage.textContent = message;
+            
+            // Set icon and color based on type
+            if (type === 'success') {
+                statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                statusBar.className = 'mb-6 p-4 bg-green-50 border border-green-200 rounded-lg shadow-md';
+            } else if (type === 'error') {
+                statusIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+                statusBar.className = 'mb-6 p-4 bg-red-50 border border-red-200 rounded-lg shadow-md';
+            } else {
+                statusIcon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
+                statusBar.className = 'mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-md';
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusBar.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Data collection
+        async function collectData() {
+            showLoading();
+            showStatus('Collecting flight data from APIs...', 'info');
+            
+            try {
+                const response = await fetch('/api/collect-data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    appState.dataCollected = true;
+                    showStatus(`Successfully collected ${data.flights_collected} flight records`, 'success');
+                    updateQuickStats(data.flights_collected);
+                } else {
+                    showStatus(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Network error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Trend analysis
+        async function analyzeData() {
+            if (!appState.dataCollected) {
+                showStatus('Please collect data first before analyzing trends', 'error');
+                return;
+            }
+            
+            showLoading();
+            showStatus('Analyzing market trends and generating insights...', 'info');
+            
+            try {
+                // Get trend analysis
+                const trendResponse = await fetch('/api/analyze-trends');
+                const trendData = await trendResponse.json();
+                
+                if (trendData.success) {
+                    appState.analysisComplete = true;
+                    updateDashboard(trendData);
+                    
+                    // Get visualizations
+                    const vizResponse = await fetch('/api/visualizations');
+                    const vizData = await vizResponse.json();
+                    
+                    if (vizData.success) {
+                        updateCharts(vizData.charts);
+                        showStatus('Analysis complete! Market insights generated.', 'success');
+                    } else {
+                        showStatus('Analysis complete, but visualization generation failed', 'error');
+                    }
+                } else {
+                    showStatus(`Analysis failed: ${trendData.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Analysis error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Update dashboard components
+        function updateQuickStats(flightCount) {
+            const quickStats = document.getElementById('quickStats');
+            quickStats.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Flights Collected:</span>
+                    <span class="font-semibold text-blue-600">${flightCount}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Data Status:</span>
+                    <span class="font-semibold text-green-600">Ready</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Last Updated:</span>
+                    <span class="font-semibold text-gray-600">${new Date().toLocaleTimeString()}</span>
+                </div>
+            `;
+        }
+
+        function updateDashboard(data) {
+            // Update top routes
+            const topRoutes = document.getElementById('topRoutes');
+            const routes = data.popular_routes.slice(0, 5);
+            
+            topRoutes.innerHTML = routes.map(route => `
+                <div class="flex justify-between items-center py-1 border-b border-gray-100">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">${route.route}</div>
+                        <div class="text-xs text-gray-500">${route.cities}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-semibold text-blue-600">${route.flight_count}</div>
+                        <div class="text-xs text-gray-500">${route.avg_price}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update AI insights
+            const aiInsights = document.getElementById('aiInsights');
+            aiInsights.innerHTML = `
+                <div class="text-sm text-gray-700 leading-relaxed">
+                    ${data.ai_insights}
+                </div>
+            `;
+
+            // Update detailed table
+            updateRouteTable(data.popular_routes);
+        }
+
+        function updateRouteTable(routes) {
+            const tbody = document.getElementById('routeTableBody');
+            
+            tbody.innerHTML = routes.map(route => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-800">${route.route}</td>
+                    <td class="px-4 py-3 text-gray-600">${route.cities}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                            ${route.flight_count}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-green-600 font-semibold">${route.avg_price}</td>
+                    <td class="px-4 py-3">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: ${route.avg_demand * 10}%"></div>
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1">${route.avg_demand}/10</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateCharts(charts) {
+            // Popular routes chart
+            if (charts.popular_routes && charts.popular_routes.data.length > 0) {
+                Plotly.newPlot('popularRoutesChart', charts.popular_routes.data, charts.popular_routes.layout, {
+                    responsive: true,
+                    displayModeBar: false
+                });
+            }
+
+            // Price trends chart
+            if (charts.price_trends && charts.price_trends.data.length > 0) {
+                Plotly.newPlot('priceTrendsChart', charts.price_trends.data, charts.price_trends.layout, {
+                    responsive: true,
+                    displayModeBar: false
+                });
+            } else {
+                document.getElementById('priceTrendsChart').innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-chart-line text-4xl mb-4"></i>
+                            <p>No price trend data available</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Demand distribution chart
+            if (charts.demand_distribution && charts.demand_distribution.data.length > 0) {
+                Plotly.newPlot('demandChart', charts.demand_distribution.data, charts.demand_distribution.layout, {
+                    responsive: true,
+                    displayModeBar: false
+                });
+            }
+        }
+
+        // Event listeners
+        document.getElementById('collectDataBtn').addEventListener('click', collectData);
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeData);
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showStatus('Welcome! Click "Collect Data" to start analyzing airline market trends.', 'info');
+        });
+    </script>
+</body>
+</html>
